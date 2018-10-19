@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+
+    <!-- 启用注解 -->
+    <context:annotation-config />
+
+    <!-- 【配置视图解析器】 -->
+    <!-- InternalResourceViewResolver会在ModelAndView返回的视图名前加上prefix指定的前缀，再在最后加上suffix指定的后缀 -->
+    <!-- 由于UserController返回的ModelAndView中的视图名是userlist，故该视图解析器将在/WEB-INF/jsp/userlist.jsp处查找视图 -->
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/views/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!--&lt;!&ndash;  导入springMvc.xml配置文件 &ndash;&gt;-->
+    <!--<import resource="spring-mvc-config.xml" />-->
+    <!-- 加载数据库配置 -->
+    <context:property-placeholder location="classpath*:db.properties" />
+    <!-- 加载数据源 -->
+    <!--<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">-->
+        <!--<property name="driverClassName" value="${db.driverClassName}" />-->
+        <!--<property name="url" value="${db.url}" />-->
+        <!--<property name="username" value="${db.username}" />-->
+        <!--<property name="password" value="${db.password}" />-->
+        <!--<property name="maxActive" value="${db.maxActive}" />-->
+        <!--<property name="maxIdle" value="${db.maxIdle}" />-->
+        <!--<property name="minIdle" value="${db.minIdle}" />-->
+        <!--<property name="maxWait" value="${db.maxWait}" />-->
+    <!--</bean>-->
+    <!--<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">-->
+        <!--<property name="driverClassName" value="${gundam.jdbc.driver}"/>-->
+        <!--<property name="username" value="${gundam.jdbc.username}"/>-->
+        <!--<property name="password" value="${gundam.jdbc.password}"/>-->
+        <!--<property name="url" value="${gundam.jdbc.url}"/>-->
+    <!--</bean>-->
+
+
+
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+    <property name="driverClass" value="${gundam.jdbc.driver}"/>
+    <property name="user" value="${gundam.jdbc.username}"/>
+    <property name="password" value="${gundam.jdbc.password}"/>
+    <property name="jdbcUrl" value="${gundam.jdbc.url}"/>
+        <property name="minPoolSize" value="50" />
+        <property name="maxPoolSize" value="100" />
+        <property name="maxIdleTime" value="60" />
+        <property name="acquireIncrement" value="30" />
+        <property name="maxStatements" value="0" />
+        <property name="initialPoolSize" value="50" />
+        <property name="idleConnectionTestPeriod" value="60" />
+    </bean>
+
+
+    <!--<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">-->
+    <!--<property name="driverClassName" value="${gundam.jdbc.driver}" />-->
+    <!--<property name="url" value="${gundam.jdbc.url}" />-->
+    <!--<property name="username" value="${gundam.jdbc.username}" />-->
+    <!--<property name="password" value="${gundam.jdbc.password}" />-->
+    <!--<property name="maxActive" value="500" />-->
+    <!--<property name="maxIdle" value="30" />-->
+    <!--<property name="minIdle" value="5" />-->
+    <!--<property name="maxWait" value="5000" />-->
+    <!--</bean>-->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="packagesToScan" value="com.maxrocky.gundam.domain.*"/>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">${gundam.hibernate.dialect}</prop>
+                <prop key="hibernate.show_sql">${gundam.hibernate.show_sql}</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.hbm2ddl.auto">${gundam.hibernate.hbm2ddl.auto}</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!--<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">-->
+    <!--<property name="dataSource" ref="dataSource" />-->
+    <!--<property name="packagesToScan" value="com.maxrocky.gundam.domain.*"/>-->
+    <!--<property name="hibernateProperties">-->
+    <!--<props>-->
+    <!--<prop key="hibernate.dialect">${hibernate.dialect}</prop>-->
+    <!--<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>-->
+    <!--<prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>-->
+    <!--<prop key="hibernate.enable_lazy_load_no_trans">${hibernate.enable_lazy_load_no_trans}</prop>-->
+    <!--<prop key="hibernate.autoReconnect">${hibernate.autoReconnect}</prop>-->
+    <!--&lt;!&ndash;以格式良好的方式显示SQL语句&ndash;&gt;-->
+    <!--<prop key="format_sql">${format_sql}</prop>-->
+    <!--&lt;!&ndash;校验模式  JPA  java persistent api&ndash;&gt;-->
+    <!--<prop key="javax.persistence.validation.mode">${javax.persistence.validation.mode}</prop>-->
+    <!--&lt;!&ndash;<prop key="hibernate.query.factory_class">org.hibernate.hql.ast.ASTQueryTranslatorFactory</prop>&ndash;&gt;-->
+    <!--</props>-->
+    <!--</property>-->
+    <!--</bean>-->
+
+
+
+    <!--spring中不注解controller-->
+    <context:component-scan base-package="com.maxrocky.gundam">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!--&lt;!&ndash; 声明式事务 &ndash;&gt;-->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+    <!--AOP配置-->
+    <aop:config proxy-target-class="true">
+        <aop:pointcut id="productServiceMethods" expression="execution(* com.maxrocky.gundam.service..*.*(..))" />
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="productServiceMethods" />
+    </aop:config>
+
+
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <!--所有方法都带事务-->
+            <tx:method name="*"   propagation="REQUIRED" />
+            <!--各种限定方法带事务-->
+            <!--<tx:method name="save*"   propagation="REQUIRED" />-->
+            <!--<tx:method name="add*"    propagation="REQUIRED" />-->
+            <!--<tx:method name="create*" propagation="REQUIRED" />-->
+            <!--<tx:method name="insert*" propagation="REQUIRED" />-->
+            <!--<tx:method name="update*" propagation="REQUIRED" />-->
+            <!--<tx:method name="merge*"  propagation="REQUIRED" />-->
+            <!--<tx:method name="del*"    propagation="REQUIRED" />-->
+            <!--<tx:method name="remove*" propagation="REQUIRED" />-->
+            <!--<tx:method name="put*"    propagation="REQUIRED" />-->
+            <tx:method name="get*"  read-only="true"/>
+            <!--<tx:method name="save*" />-->
+        </tx:attributes>
+    </tx:advice>
+
+    <!--读取property文件，用于返回成功失败提示 -->
+    <bean id="errorProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean" >
+        <property name="locations">
+            <list>
+                <value>classpath*:*_success_msg_zh.properties</value>
+                <value>classpath*:*_error_msg_zh.properties</value>
+            </list>
+        </property>
+        <property name="fileEncoding"><value>UTF-8</value></property>
+    </bean>
+    <bean id="propertyConfigurer" class="com.maxrocky.gundam.common.result.CustomizedPropertyPlaceholderConfigurer" >
+        <property name="properties" ref="errorProperties"/>
+    </bean>
+
+</beans>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+
+
+       <context:property-placeholder location="classpath*:*.properties"/>
+
+       <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+              <property name="driverClassName" value="${gundam.jdbc.driver}"/>
+              <property name="username" value="${gundam.jdbc.username}"/>
+              <property name="password" value="${gundam.jdbc.password}"/>
+              <property name="url" value="${gundam.jdbc.url}"/>
+       </bean>
+
+       <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+              <property name="dataSource" ref="dataSource"/>
+              <property name="packagesToScan" value="com.maxrocky.gundam.domain.*"/>
+              <property name="hibernateProperties">
+                     <props>
+                            <prop key="hibernate.dialect">${gundam.hibernate.dialect}</prop>
+                            <prop key="hibernate.show_sql">${gundam.hibernate.show_sql}</prop>
+                            <prop key="hibernate.format_sql">true</prop>
+                            <prop key="hibernate.hbm2ddl.auto">${gundam.hibernate.hbm2ddl.auto}</prop>
+                     </props>
+              </property>
+       </bean>
+
+       <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+              <property name="sessionFactory" ref="sessionFactory" />
+       </bean>
+
+       <tx:annotation-driven transaction-manager="transactionManager"/>
+
+
+       <!--AOP配置-->
+       <aop:config proxy-target-class="true">
+              <aop:pointcut id="serviceMethod" expression="execution(* com.maxrocky.gundam.service..*.*(..))" />
+              <aop:advisor advice-ref="txAdvice" pointcut-ref="serviceMethod" />
+       </aop:config>
+
+
+       <tx:advice id="txAdvice" transaction-manager="transactionManager">
+              <tx:attributes>
+                     <!--所有方法都带事务-->
+                     <tx:method name="*"   propagation="REQUIRED" />
+                     <!--各种限定方法带事务-->
+                     <!--<tx:method name="save*"   propagation="REQUIRED" />-->
+                     <!--<tx:method name="add*"    propagation="REQUIRED" />-->
+                     <!--<tx:method name="create*" propagation="REQUIRED" />-->
+                     <!--<tx:method name="insert*" propagation="REQUIRED" />-->
+                     <!--<tx:method name="update*" propagation="REQUIRED" />-->
+                     <!--<tx:method name="merge*"  propagation="REQUIRED" />-->
+                     <!--<tx:method name="del*"    propagation="REQUIRED" />-->
+                     <!--<tx:method name="remove*" propagation="REQUIRED" />-->
+                     <!--<tx:method name="put*"    propagation="REQUIRED" />-->
+                     <tx:method name="get*"  read-only="true"/>
+                     <!--<tx:method name="save*" />-->
+              </tx:attributes>
+       </tx:advice>
+
+       <!--<tx:advice id="txAdvice" transaction-manager="myTxManager">-->
+              <!--<tx:attributes>-->
+                     <!--<tx:method name="increasePrice*" propagation="REQUIRED"/>-->
+                     <!--<tx:method name="someOtherBusinessMethod" propagation="REQUIRES_NEW"/>-->
+                     <!--<tx:method name="*" propagation="SUPPORTS" read-only="true"/>-->
+              <!--</tx:attributes>-->
+       <!--</tx:advice>-->
+
+       <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+              <property name="maxTotal" value="${redis.maxTotal}" />
+              <property name="maxIdle" value="${redis.maxIdle}" />
+              <property name="timeBetweenEvictionRunsMillis" value="${redis.timeBetweenEvictionRunsMillis}" />
+              <property name="minEvictableIdleTimeMillis" value="${redis.minEvictableIdleTimeMillis}" />
+              <property name="testOnBorrow" value="${redis.testOnBorrow}" />
+       </bean>
+
+       <bean id="jedisConnFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+              p:hostName="${redis.host}"
+              p:port="${redis.port}"
+              p:password="${redis.pass}"
+              p:poolConfig-ref="poolConfig"/>
+
+       <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+              <property name="connectionFactory" ref="jedisConnFactory" />
+              <property name="keySerializer">
+                     <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+              </property>
+              <property name="valueSerializer">
+                     <bean class="com.maxrocky.gundam.coreservice.cache.GenericJackson2JsonRedisSerializer"/>
+              </property>
+       </bean>
+
+</beans>

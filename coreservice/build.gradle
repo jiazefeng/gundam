@@ -1,0 +1,67 @@
+group 'com.maxrocky'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'war'
+apply plugin: 'jetty'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+ext {
+    springVersion = '4.2.6.RELEASE'
+    hibernateVersion='5.1.0.Final'
+    jacksonVersion='2.7.4'
+    kaaVersion='0.9.0'
+}
+repositories {
+    mavenLocal()
+    mavenCentral()
+//    maven {
+//        artifactUrls "http://repository.kaaproject.org/repository/internal/"
+//    }
+
+}
+
+
+dependencies {
+    compile project(":webservice")
+    compile project(":commons")
+    compile (
+            "org.springframework:spring-webmvc:$springVersion",
+            "org.springframework:spring-context:$springVersion",
+            "org.springframework:spring-websocket:$springVersion",
+            "org.springframework:spring-messaging:$springVersion",
+            "org.springframework:spring-orm:$springVersion",
+            "org.springframework:spring-tx:$springVersion",
+            'org.springframework.data:spring-data-redis:1.7.2.RELEASE',
+            'redis.clients:jedis:2.8.1',
+            "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.0.2",
+            "org.hibernate:hibernate-entitymanager:$hibernateVersion",
+            "mysql:mysql-connector-java:6.0.2",
+            "commons-configuration:commons-configuration:1.10",
+            "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion",
+            'ma.glasnost.orika:orika-core:1.4.6',
+            'com.esri.geometry:esri-geometry-api:1.2.1',
+            'org.ujmp:ujmp-core:0.3.0',
+            'org.ujmp:ujmp-gui:0.3.0',
+            'nz.ac.waikato.cms.weka:weka-stable:3.8.0'
+
+//            "org.kaaproject.kaa.server.common:admin-rest-client:$kaaVersion"
+    )
+
+    providedCompile(
+            "javax.servlet:javax.servlet-api:3.1.0"
+    )
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+//task copyHbmConfig(type: Copy){
+//    from 'src/main/resources'
+//    into "$projectDir/../gundam.presentation.wechat/src/main/resources"
+//}
+task jarWithResources(type: Jar) {
+    baseName project.name
+    from("$buildDir/classes/main")
+    from("$projectDir/src/main/resources")
+}

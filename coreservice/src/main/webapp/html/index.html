@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+    <title>webSocket测试</title>
+    <script type="text/javascript">
+        var postcontent =
+        {
+            "pose":1.041,
+                    "gps":{
+                "x":116.415727,
+                        "y":39.968935,
+                        "z":0.0,
+                        "starNum":4
+            },
+            "status":{
+                "power":85,"alert":1,
+                        "isCharging":true
+            },
+            "id":{
+                "robetID":"b05b4072e2be4eee875bbfa6eeb76fda",
+                        "endpointKeyHash":"M349HBABEFJ"
+            },
+            "reportTime":1466959017278
+        };
+
+        $(function(){
+            var websocket = new WebSocket("ws://localhost:8080/WebSocket");
+            $("#message").val(JSON.stringify(postcontent));
+            websocket.onopen = function (evnt) {
+                $("#msg").append("链接服务器成功!");
+                websocket.send('{"robotId":"b05b4072e2be4eee875bbfa6eeb76fda"}');
+            };
+            websocket.onmessage = function (evnt) {
+                $("#msg").append("<br/>" + evnt.data);
+            };
+            websocket.onerror = function (evnt) {
+            };
+            websocket.onclose = function (evnt) {
+                $("#tou").append("与服务器断开了链接!")
+            }
+            $('#send').bind('click', function() {
+                send();
+            });
+            function send(){
+                if (websocket != null) {
+                    var message = $('#message').val();
+                    websocket.send(message);
+                } else {
+                    alert('未与服务器链接.');
+                }
+            }
+        });
+    </script>
+
+</head>
+<body>
+<div>
+    <div id="msg">
+    </div>
+    <div>
+        <div>
+            <input type="text" placeholder="发送信息..." id="message">
+            <button type="button" id="send" >发送</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>
